@@ -2,23 +2,191 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>경쟁사 뉴스 모니터링 — 초기화 중</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경쟁사 뉴스 모니터링 — 비버웍스 경영관리본부</title>
 <style>
-body { font-family: -apple-system, sans-serif; background: #f8f9fb; color: #1a1a2e; padding: 60px 20px; text-align: center; }
-.box { max-width: 500px; margin: 0 auto; background: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-h1 { font-size: 20px; color: #1F4E79; margin-bottom: 16px; }
-p { color: #555; margin: 8px 0; line-height: 1.6; font-size: 14px; }
-.spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e0e7ff; border-top-color: #1F4E79; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-@keyframes spin { to { transform: rotate(360deg); } }
+:root { color-scheme: light; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fb; color: #1a1a2e; line-height: 1.6; }
+.header { background: linear-gradient(135deg, #1F4E79 0%, #2E75B6 100%); color: white; padding: 20px 24px; }
+.header h1 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.header .sub { font-size: 12px; opacity: 0.85; }
+.toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e0e4ea; flex-wrap: wrap; }
+.toolbar .update-info { font-size: 12px; color: #666; flex: 1; }
+.toolbar .update-info strong { color: #1F4E79; }
+.shared-badge { background: #dcfce7; color: #166534; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 700; }
+.btn-refresh { padding: 6px 12px; font-size: 12px; font-weight: 700; border: 1px solid #e0e4ea; border-radius: 6px; cursor: pointer; background: #fff; color: #1F4E79; transition: all 0.2s; }
+.btn-refresh:hover { background: #1F4E79; color: #fff; border-color: #1F4E79; }
+
+.highlights { padding: 16px; }
+.highlights-title { font-size: 14px; font-weight: 700; color: #1F4E79; margin-bottom: 10px; }
+.highlight-card { display: flex; gap: 10px; align-items: flex-start; background: #fff; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; border-left: 4px solid #2E75B6; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.highlight-card .hl-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; white-space: nowrap; background: #e0e7ff; color: #4338ca; flex-shrink: 0; margin-top: 2px; }
+.highlight-card .hl-body { flex: 1; min-width: 0; }
+.highlight-card .hl-company { font-size: 11px; color: #888; font-weight: 600; }
+.highlight-card .hl-title { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 2px 0; }
+.highlight-card .hl-summary { font-size: 12px; color: #555; }
+.hl-type-실적 { background: #dcfce7 !important; color: #166534 !important; }
+.hl-type-투자 { background: #fef3c7 !important; color: #92400e !important; }
+.hl-type-제휴 { background: #e0e7ff !important; color: #4338ca !important; }
+.hl-type-신규서비스 { background: #fce7f3 !important; color: #be185d !important; }
+.hl-type-인사 { background: #f3e8ff !important; color: #7c3aed !important; }
+.hl-type-규제 { background: #fee2e2 !important; color: #dc2626 !important; }
+
+.no-data { text-align: center; padding: 40px 20px; color: #999; }
+
+.tabs { display: flex; background: #fff; border-bottom: 1px solid #e0e4ea; overflow-x: auto; }
+.tab { padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: #666; white-space: nowrap; transition: all 0.2s; }
+.tab:hover { color: #1F4E79; }
+.tab.active { color: #1F4E79; border-bottom-color: #1F4E79; }
+.tab .badge { background: #e8eef5; color: #1F4E79; font-size: 11px; padding: 1px 7px; border-radius: 10px; margin-left: 4px; }
+.tab.active .badge { background: #1F4E79; color: #fff; }
+.content { padding: 16px; max-width: 900px; margin: 0 auto; }
+.search-bar { padding: 0 16px 12px; max-width: 900px; margin: 0 auto; }
+.search-input { width: 100%; padding: 9px 14px; border: 1px solid #e0e4ea; border-radius: 8px; font-size: 13px; outline: none; }
+.search-input:focus { border-color: #2E75B6; box-shadow: 0 0 0 3px rgba(46,117,182,0.1); }
+
+.company-card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.card-name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.card-type { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.type-direct { background: #fee2e2; color: #dc2626; }
+.type-indirect { background: #fef3c7; color: #d97706; }
+.type-eco { background: #d1fae5; color: #059669; }
+.type-bigtech { background: #e0e7ff; color: #4338ca; }
+.type-kiosk { background: #fce7f3; color: #be185d; }
+.card-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.tag { font-size: 10px; padding: 2px 7px; background: #f1f5f9; border-radius: 12px; color: #475569; }
+
+.news-section { border-top: 1px solid #f0f0f0; padding-top: 10px; margin-top: 6px; }
+.news-item { padding: 8px 0; border-bottom: 1px solid #f8f8f8; }
+.news-item:last-child { border-bottom: none; }
+.news-item .ni-title { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+.news-item .ni-title a { color: #1F4E79; text-decoration: none; }
+.news-item .ni-title a:hover { text-decoration: underline; }
+.news-item .ni-summary { font-size: 12px; color: #555; margin-top: 2px; }
+.news-item .ni-meta { font-size: 10px; color: #aaa; margin-top: 2px; }
+.no-news { font-size: 12px; color: #ccc; font-style: italic; padding: 6px 0; }
+.news-count { font-size: 11px; color: #2E75B6; font-weight: 600; margin-left: 6px; }
+.footer { padding: 20px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; margin-top: 20px; }
+.footer a { color: #2E75B6; text-decoration: none; }
 </style>
-<meta http-equiv="refresh" content="60">
 </head>
 <body>
-<div class="box">
-  <div class="spinner"></div>
-  <h1>경쟁사 뉴스 모니터링 — 초기화 중</h1>
-  <p>첫 자동 갱신 중입니다.</p>
-  <p>약 1~2분 후 자동으로 새로고침됩니다.</p>
+
+<div class="header">
+  <h1>오프라인 결제·매장관리 시장 경쟁사 모니터링</h1>
+  <div class="sub">POS/테이블오더/키오스크 · 결제(PG/VAN) · 멤버십/브랜드앱 · 빅테크 플랫폼 — 30개 업체</div>
 </div>
+
+<div class="toolbar">
+  <div class="update-info">
+    마지막 업데이트: <strong id="lastUpdated">-</strong>
+  </div>
+  <button class="btn-refresh" onclick="location.reload(true)">🔄 새로고침</button>
+  <span class="shared-badge">비버웍스 경영관리본부</span>
+</div>
+
+<div id="highlightsSection"></div>
+
+<div class="search-bar" style="padding-top:12px;">
+  <input type="text" class="search-input" id="searchInput" placeholder="업체명 또는 키워드 검색...">
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="content" id="content"></div>
+<div class="footer">
+  매일 09/11/13/15/17/19시 자동 갱신 · 데이터 출처: 네이버 뉴스 검색 API
+</div>
+
+<script>
+const NEWS_DATA = {"티오더": [], "페이히어": [], "하나시스": [], "포스뱅크": [], "오케이포스": [], "캐치테이블": [], "메뉴잇": [], "한국전자금융": [], "씨아이테크": [], "니스인프라": [], "성신이노텍": [], "푸른기술": [], "토스플레이스": [], "한국신용데이터(KCD)": [], "KG이니시스": [], "NHN한국사이버결제(KCP)": [], "헥토파이낸셜": [], "KICC": [], "KPN": [], "나이스페이먼츠": [], "토스페이먼츠": [], "발트루스트": [], "도도포인트": [], "채널톡": [], "리뷰노트": [], "네이버": [], "카카오": [], "토스": [], "배달의민족": [], "당근": []};
+const HIGHLIGHTS = [];
+const LAST_UPDATED = "2026-04-30 14:52 KST";
+const COMPANIES = {"POS / 테이블오더 / 키오스크": [{"name": "티오더", "desc": "태블릿 기반 테이블오더 1위. 누적 35만대 설치.", "tags": ["테이블오더", "태블릿", "AI"], "type": "direct"}, {"name": "페이히어", "desc": "모바일 POS 기반 소상공인 매장관리 솔루션.", "tags": ["모바일POS", "SaaS"], "type": "direct"}, {"name": "하나시스", "desc": "POS·키오스크 전문기업. HW+SW 통합.", "tags": ["POS", "키오스크", "프랜차이즈"], "type": "direct"}, {"name": "포스뱅크", "desc": "POS·키오스크 하드웨어 제조. 글로벌 수출.", "tags": ["POS하드웨어", "키오스크", "수출"], "type": "indirect"}, {"name": "오케이포스", "desc": "POS·키오스크·VAN 사업 겸영.", "tags": ["POS", "키오스크", "VAN"], "type": "indirect"}, {"name": "캐치테이블", "desc": "레스토랑 예약·웨이팅 플랫폼.", "tags": ["예약", "웨이팅", "외식"], "type": "indirect"}, {"name": "메뉴잇", "desc": "QR 기반 모바일 오더 서비스.", "tags": ["QR오더", "비대면"], "type": "indirect"}, {"name": "한국전자금융", "desc": "코스닥 상장 키오스크 전문. 무인결제·식권·주차.", "tags": ["키오스크", "무인결제", "코스닥"], "type": "kiosk"}, {"name": "씨아이테크", "desc": "키오스크·DID 전문 상장기업.", "tags": ["키오스크", "DID", "공공"], "type": "kiosk"}, {"name": "니스인프라", "desc": "NICE그룹 키오스크 제조. 대형 고객사 다수.", "tags": ["키오스크", "NICE그룹"], "type": "kiosk"}, {"name": "성신이노텍", "desc": "키오스크 전문 제조. 무인주문·결제·발권.", "tags": ["키오스크제조", "무인주문"], "type": "kiosk"}, {"name": "푸른기술", "desc": "식권·세금환급 키오스크. 한국전자금융 협업.", "tags": ["식권키오스크", "세금환급"], "type": "kiosk"}], "결제 (PG / VAN)": [{"name": "토스플레이스", "desc": "토스 오프라인 결제 단말기. 가맹점 30만+.", "tags": ["결제단말기", "토스"], "type": "direct"}, {"name": "한국신용데이터(KCD)", "desc": "캐시노트 운영. 200만 사업장.", "tags": ["캐시노트", "소상공인금융"], "type": "direct"}, {"name": "KG이니시스", "desc": "국내 1위 PG사.", "tags": ["PG", "온오프라인"], "type": "eco"}, {"name": "NHN한국사이버결제(KCP)", "desc": "NHN 계열 PG사.", "tags": ["PG", "NHN"], "type": "eco"}, {"name": "헥토파이낸셜", "desc": "PG·VAN 통합. 간편결제·송금.", "tags": ["PG", "VAN"], "type": "eco"}, {"name": "KICC", "desc": "VAN·PG 겸업. 오프라인 결제 핵심.", "tags": ["VAN", "PG"], "type": "eco"}, {"name": "KPN", "desc": "VAN사. 소상공인 결제 단말기.", "tags": ["VAN", "단말기"], "type": "eco"}, {"name": "나이스페이먼츠", "desc": "나이스그룹 PG사.", "tags": ["PG", "나이스"], "type": "eco"}, {"name": "토스페이먼츠", "desc": "토스 온라인 PG. 개발자 친화적.", "tags": ["PG", "API"], "type": "eco"}], "멤버십 / 브랜드앱": [{"name": "발트루스트", "desc": "매장 멤버십·브랜드앱 솔루션. CRM.", "tags": ["멤버십", "브랜드앱", "CRM"], "type": "direct"}, {"name": "도도포인트", "desc": "태블릿 포인트 적립. 고객관리.", "tags": ["포인트적립", "고객관리"], "type": "indirect"}, {"name": "채널톡", "desc": "AI 고객 메신저. 통합 CRM.", "tags": ["메신저", "CRM", "AI"], "type": "indirect"}, {"name": "리뷰노트", "desc": "리뷰 관리·마케팅 자동화.", "tags": ["리뷰", "마케팅"], "type": "indirect"}], "빅테크 / 플랫폼": [{"name": "네이버", "desc": "네이버페이·스마트주문·예약.", "tags": ["네이버페이", "스마트주문"], "type": "bigtech"}, {"name": "카카오", "desc": "카카오페이·톡주문·선물하기.", "tags": ["카카오페이", "톡주문"], "type": "bigtech"}, {"name": "토스", "desc": "결제 생태계. 토스페이·플레이스.", "tags": ["토스페이", "슈퍼앱"], "type": "bigtech"}, {"name": "배달의민족", "desc": "배달앱 1위. 배민오더 확장.", "tags": ["배달", "매장주문"], "type": "bigtech"}, {"name": "당근", "desc": "로컬 플랫폼. 동네가게·당근페이.", "tags": ["로컬커머스", "당근페이"], "type": "bigtech"}]};
+
+const TYPE_LABELS = { direct: "직접경쟁", indirect: "간접경쟁", eco: "생태계", bigtech: "빅테크", kiosk: "키오스크" };
+const TYPE_CLASS = { direct: "type-direct", indirect: "type-indirect", eco: "type-eco", bigtech: "type-bigtech", kiosk: "type-kiosk" };
+
+let activeTab = Object.keys(COMPANIES)[0];
+let allCompanies = [];
+Object.entries(COMPANIES).forEach(([cat, list]) => list.forEach(c => allCompanies.push({...c, category: cat})));
+
+if (typeof LAST_UPDATED !== 'undefined' && LAST_UPDATED) {
+  document.getElementById('lastUpdated').textContent = LAST_UPDATED;
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderHighlights() {
+  const el = document.getElementById('highlightsSection');
+  if (!HIGHLIGHTS || HIGHLIGHTS.length === 0) { el.innerHTML = ''; return; }
+  let html = '<div class="highlights"><div class="highlights-title">오늘의 핵심 뉴스</div>';
+  HIGHLIGHTS.forEach(h => {
+    const typeClass = h.type ? ' hl-type-' + h.type : '';
+    html += `<div class="highlight-card"><span class="hl-badge${typeClass}">${escapeHtml(h.type || '뉴스')}</span><div class="hl-body"><div class="hl-company">${escapeHtml(h.company)}</div><div class="hl-title">${escapeHtml(h.title)}</div><div class="hl-summary">${escapeHtml(h.summary || '')}</div></div></div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderTabs() {
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  Object.entries(COMPANIES).forEach(([cat, list]) => {
+    const t = document.createElement('div');
+    t.className = 'tab' + (cat === activeTab ? ' active' : '');
+    t.innerHTML = escapeHtml(cat) + '<span class="badge">' + list.length + '</span>';
+    t.onclick = () => { activeTab = cat; renderTabs(); renderContent(); };
+    tabsEl.appendChild(t);
+  });
+  const all = document.createElement('div');
+  all.className = 'tab' + (activeTab === '전체' ? ' active' : '');
+  all.innerHTML = '전체<span class="badge">' + allCompanies.length + '</span>';
+  all.onclick = () => { activeTab = '전체'; renderTabs(); renderContent(); };
+  tabsEl.appendChild(all);
+}
+
+function renderContent(filter) {
+  const el = document.getElementById('content');
+  const companies = activeTab === '전체' ? allCompanies : COMPANIES[activeTab] || [];
+  const filtered = filter ? companies.filter(c =>
+    c.name.toLowerCase().includes(filter) ||
+    c.desc.toLowerCase().includes(filter) ||
+    c.tags.some(t => t.toLowerCase().includes(filter)) ||
+    (NEWS_DATA[c.name] || []).some(n => n.title.toLowerCase().includes(filter) || (n.summary||'').toLowerCase().includes(filter))
+  ) : companies;
+  let html = '';
+  filtered.forEach(c => {
+    const news = NEWS_DATA[c.name] || [];
+    const newsCountHtml = news.length > 0 ? `<span class="news-count">${news.length}건</span>` : '';
+    html += `<div class="company-card"><div class="card-header"><div class="card-name">${escapeHtml(c.name)}${newsCountHtml}</div><span class="card-type ${TYPE_CLASS[c.type]}">${TYPE_LABELS[c.type]}</span></div><div class="card-desc">${escapeHtml(c.desc)}</div><div class="card-tags">${c.tags.map(t => '<span class="tag">#' + escapeHtml(t) + '</span>').join('')}</div>`;
+    if (news.length > 0) {
+      html += '<div class="news-section">';
+      news.forEach(n => {
+        const titleHtml = n.url ? `<a href="${escapeHtml(n.url)}" target="_blank" rel="noopener">${escapeHtml(n.title)}</a>` : escapeHtml(n.title);
+        html += `<div class="news-item"><div class="ni-title">${titleHtml}</div>${n.summary ? '<div class="ni-summary">' + escapeHtml(n.summary) + '</div>' : ''}<div class="ni-meta">${escapeHtml(n.source || '')} ${n.date ? '· ' + escapeHtml(n.date) : ''}</div></div>`;
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="no-news">최근 특이사항 없음</div>';
+    }
+    html += '</div>';
+  });
+  if (filtered.length === 0) html = '<div class="no-data">검색 결과가 없습니다</div>';
+  el.innerHTML = html;
+}
+
+document.getElementById('searchInput').addEventListener('input', function(e) {
+  renderContent(e.target.value.toLowerCase());
+});
+
+renderHighlights();
+renderTabs();
+renderContent();
+</script>
 </body>
 </html>
