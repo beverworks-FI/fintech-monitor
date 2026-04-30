@@ -5,187 +5,574 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>경쟁사 뉴스 모니터링 — 비버웍스 경영관리본부</title>
 <style>
-:root { color-scheme: light; }
+:root {
+  color-scheme: light;
+  --bg: #f5f6fa;
+  --card-bg: #ffffff;
+  --text: #1a1a2e;
+  --text-2: #4b5563;
+  --text-3: #6b7280;
+  --border: #e5e7eb;
+  --border-2: #f0f2f5;
+  --primary: #1F4E79;
+  --primary-2: #2E75B6;
+  --primary-light: #e8eef5;
+  --positive: #16a34a;
+  --positive-bg: #dcfce7;
+  --negative: #dc2626;
+  --negative-bg: #fee2e2;
+  --neutral: #64748b;
+  --neutral-bg: #f1f5f9;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --shadow: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-hover: 0 6px 16px rgba(15,23,42,0.12);
+  --radius: 10px;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fb; color: #1a1a2e; line-height: 1.6; }
-.header { background: linear-gradient(135deg, #1F4E79 0%, #2E75B6 100%); color: white; padding: 20px 24px; }
-.header h1 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
-.header .sub { font-size: 12px; opacity: 0.85; }
-.toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e0e4ea; flex-wrap: wrap; }
-.toolbar .update-info { font-size: 12px; color: #666; flex: 1; }
-.toolbar .update-info strong { color: #1F4E79; }
-.shared-badge { background: #dcfce7; color: #166534; font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 700; }
-.btn-refresh { padding: 6px 12px; font-size: 12px; font-weight: 700; border: 1px solid #e0e4ea; border-radius: 6px; cursor: pointer; background: #fff; color: #1F4E79; transition: all 0.2s; }
-.btn-refresh:hover { background: #1F4E79; color: #fff; border-color: #1F4E79; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
 
-.highlights { padding: 16px; }
-.highlights-title { font-size: 14px; font-weight: 700; color: #1F4E79; margin-bottom: 10px; }
-.highlight-card { display: flex; gap: 10px; align-items: flex-start; background: #fff; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; border-left: 4px solid #2E75B6; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.highlight-card .hl-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; white-space: nowrap; background: #e0e7ff; color: #4338ca; flex-shrink: 0; margin-top: 2px; }
-.highlight-card .hl-body { flex: 1; min-width: 0; }
-.highlight-card .hl-company { font-size: 11px; color: #888; font-weight: 600; }
-.highlight-card .hl-title { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 2px 0; }
-.highlight-card .hl-summary { font-size: 12px; color: #555; }
-.hl-type-실적 { background: #dcfce7 !important; color: #166534 !important; }
-.hl-type-투자 { background: #fef3c7 !important; color: #92400e !important; }
-.hl-type-제휴 { background: #e0e7ff !important; color: #4338ca !important; }
-.hl-type-신규서비스 { background: #fce7f3 !important; color: #be185d !important; }
-.hl-type-인사 { background: #f3e8ff !important; color: #7c3aed !important; }
-.hl-type-규제 { background: #fee2e2 !important; color: #dc2626 !important; }
+/* ============ HEADER (sticky) ============ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #1F4E79 0%, #2E75B6 100%);
+  color: white;
+  padding: 14px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.header h1 { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.header .sub { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+.header .meta { font-size: 12px; opacity: 0.95; display: flex; align-items: center; gap: 6px; }
+.header .meta .dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 6px #4ade80; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-.no-data { text-align: center; padding: 40px 20px; color: #999; }
+/* ============ KPI CARDS ============ */
+.kpi-bar {
+  max-width: 1280px;
+  margin: 16px auto 0;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--primary-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kpi-card.positive { border-left-color: var(--positive); }
+.kpi-card.negative { border-left-color: var(--negative); }
+.kpi-card.warning { border-left-color: var(--warning); }
+.kpi-label { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+.kpi-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.kpi-value.green { color: var(--positive); }
+.kpi-value.red { color: var(--negative); }
+.kpi-sub { font-size: 11px; color: var(--text-2); }
+.kpi-sub strong { color: var(--text); font-weight: 600; }
 
-.tabs { display: flex; background: #fff; border-bottom: 1px solid #e0e4ea; overflow-x: auto; }
-.tab { padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: #666; white-space: nowrap; transition: all 0.2s; }
-.tab:hover { color: #1F4E79; }
-.tab.active { color: #1F4E79; border-bottom-color: #1F4E79; }
-.tab .badge { background: #e8eef5; color: #1F4E79; font-size: 11px; padding: 1px 7px; border-radius: 10px; margin-left: 4px; }
-.tab.active .badge { background: #1F4E79; color: #fff; }
-.content { padding: 16px; max-width: 900px; margin: 0 auto; }
-.search-bar { padding: 0 16px 12px; max-width: 900px; margin: 0 auto; }
-.search-input { width: 100%; padding: 9px 14px; border: 1px solid #e0e4ea; border-radius: 8px; font-size: 13px; outline: none; }
-.search-input:focus { border-color: #2E75B6; box-shadow: 0 0 0 3px rgba(46,117,182,0.1); }
+/* ============ HIGHLIGHTS ============ */
+.highlights {
+  max-width: 1280px;
+  margin: 16px auto 0;
+  padding: 0 16px;
+}
+.section-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 10px; padding-left: 4px; display: flex; align-items: center; gap: 8px; }
+.section-title .icon { font-size: 16px; }
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+}
+.highlight-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--primary-2);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.highlight-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.highlight-card.viewed { opacity: 0.55; }
+.highlight-card.sent-positive { border-left-color: var(--positive); }
+.highlight-card.sent-negative { border-left-color: var(--negative); }
+.hl-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.hl-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; background: var(--primary-light); color: var(--primary); }
+.hl-type-실적 { background: var(--positive-bg); color: #166534; }
+.hl-type-투자 { background: #fef3c7; color: #92400e; }
+.hl-type-제휴 { background: #e0e7ff; color: #4338ca; }
+.hl-type-신규서비스 { background: #fce7f3; color: #be185d; }
+.hl-type-인사 { background: #f3e8ff; color: #7c3aed; }
+.hl-type-규제 { background: var(--negative-bg); color: var(--negative); }
+.hl-company { font-size: 11px; color: var(--text-3); font-weight: 600; }
+.hl-title { font-size: 14.5px; font-weight: 700; line-height: 1.4; color: var(--text); }
+.hl-summary {
+  font-size: 12.5px; color: var(--text-2); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.hl-source { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 
-.company-card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; }
-.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-.card-name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
-.card-type { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
-.type-direct { background: #fee2e2; color: #dc2626; }
-.type-indirect { background: #fef3c7; color: #d97706; }
+/* ============ FILTER BAR (sticky under header) ============ */
+.filter-bar {
+  position: sticky;
+  top: 64px;
+  z-index: 99;
+  background: rgba(245, 246, 250, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-top: 16px;
+}
+.filter-row { display: flex; gap: 8px; max-width: 1280px; margin: 0 auto; flex-wrap: wrap; align-items: center; }
+.filter-pill {
+  padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer; background: white; color: var(--text-2);
+  transition: all 0.15s; white-space: nowrap;
+}
+.filter-pill:hover { border-color: var(--primary-2); color: var(--primary); }
+.filter-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+.filter-divider { width: 1px; height: 20px; background: var(--border); }
+.search-input {
+  flex: 1; min-width: 200px; max-width: 400px;
+  padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px;
+  font-size: 13px; outline: none; transition: all 0.15s;
+}
+.search-input:focus { border-color: var(--primary-2); box-shadow: 0 0 0 3px rgba(46,117,182,0.15); }
+.filter-stats { font-size: 11px; color: var(--text-3); margin-left: auto; }
+
+/* ============ MAIN LAYOUT ============ */
+.main-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  max-width: 1280px;
+  margin: 16px auto;
+  padding: 0 16px;
+}
+.sidebar {
+  position: sticky;
+  top: 130px;
+  align-self: start;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 8px 0;
+  box-shadow: var(--shadow);
+}
+.sidebar-section-title { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; padding: 8px 16px 4px; letter-spacing: 0.5px; }
+.sidebar-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--text-2);
+  cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s;
+}
+.sidebar-item:hover { background: var(--neutral-bg); color: var(--primary); }
+.sidebar-item.active { color: var(--primary); border-left-color: var(--primary); background: var(--primary-light); }
+.sidebar-item .count { font-size: 11px; color: var(--text-3); background: var(--neutral-bg); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.sidebar-item.active .count { background: var(--primary); color: white; }
+
+/* mobile-tabs (shown on small screens) */
+.mobile-tabs { display: none; gap: 6px; padding: 0 16px 8px; max-width: 1280px; margin: 0 auto; overflow-x: auto; }
+.mobile-tab {
+  flex-shrink: 0;
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 16px;
+  font-size: 12px; font-weight: 600; cursor: pointer; background: white; color: var(--text-2);
+  white-space: nowrap;
+}
+.mobile-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.mobile-tab .tab-count { font-size: 10px; opacity: 0.9; margin-left: 4px; }
+
+/* ============ CONTENT ============ */
+.content { min-width: 0; }
+.company-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: var(--shadow); border: 1px solid var(--border-2);
+}
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.card-name { font-size: 16px; font-weight: 700; }
+.card-name .news-count { font-size: 12px; color: var(--primary-2); font-weight: 600; margin-left: 6px; }
+.card-type { font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 700; white-space: nowrap; }
+.type-direct { background: var(--negative-bg); color: var(--negative); }
+.type-indirect { background: var(--warning-bg); color: #d97706; }
 .type-eco { background: #d1fae5; color: #059669; }
 .type-bigtech { background: #e0e7ff; color: #4338ca; }
 .type-kiosk { background: #fce7f3; color: #be185d; }
-.card-desc { font-size: 12px; color: #888; margin-bottom: 8px; }
+.card-desc { font-size: 12px; color: var(--text-3); margin-bottom: 8px; }
 .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
-.tag { font-size: 10px; padding: 2px 7px; background: #f1f5f9; border-radius: 12px; color: #475569; }
+.tag { font-size: 10px; padding: 2px 7px; background: var(--neutral-bg); border-radius: 12px; color: var(--text-2); }
 
-.news-section { border-top: 1px solid #f0f0f0; padding-top: 10px; margin-top: 6px; }
-.news-item { padding: 8px 0; border-bottom: 1px solid #f8f8f8; }
+.news-section { border-top: 1px solid var(--border-2); padding-top: 8px; margin-top: 6px; }
+.news-item {
+  padding: 10px 0; border-bottom: 1px solid var(--border-2);
+  display: flex; gap: 10px; transition: opacity 0.2s;
+}
 .news-item:last-child { border-bottom: none; }
-.news-item .ni-title { font-size: 13px; font-weight: 600; color: #1a1a2e; }
-.news-item .ni-title a { color: #1F4E79; text-decoration: none; }
-.news-item .ni-title a:hover { text-decoration: underline; }
-.news-item .ni-summary { font-size: 12px; color: #555; margin-top: 2px; }
-.news-item .ni-meta { font-size: 10px; color: #aaa; margin-top: 2px; }
-.no-news { font-size: 12px; color: #ccc; font-style: italic; padding: 6px 0; }
-.news-count { font-size: 11px; color: #2E75B6; font-weight: 600; margin-left: 6px; }
-.footer { padding: 20px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; margin-top: 20px; }
-.footer a { color: #2E75B6; text-decoration: none; }
+.news-item.viewed { opacity: 0.5; }
+.news-sentiment-bar { flex-shrink: 0; width: 4px; border-radius: 2px; background: var(--neutral); }
+.news-sentiment-bar.positive { background: var(--positive); }
+.news-sentiment-bar.negative { background: var(--negative); }
+.news-body { flex: 1; min-width: 0; }
+.ni-title { font-size: 14px; font-weight: 600; line-height: 1.45; }
+.ni-title a:hover { color: var(--primary); text-decoration: underline; }
+.ni-summary { font-size: 12.5px; color: var(--text-2); margin-top: 4px; line-height: 1.55; }
+.ni-meta { font-size: 11px; color: var(--text-3); margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ni-source { font-weight: 600; color: var(--text-2); }
+.ni-sentiment { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+.ni-sentiment.positive { background: var(--positive-bg); color: #166534; }
+.ni-sentiment.negative { background: var(--negative-bg); color: var(--negative); }
+.ni-sentiment.neutral { background: var(--neutral-bg); color: var(--neutral); }
+.no-news { font-size: 12px; color: #cbd5e1; font-style: italic; padding: 10px 0; text-align: center; }
+
+.no-data { text-align: center; padding: 60px 20px; color: var(--text-3); }
+.no-data .big { font-size: 40px; margin-bottom: 12px; }
+
+.footer { padding: 24px 16px; text-align: center; font-size: 11px; color: var(--text-3); border-top: 1px solid var(--border); margin-top: 24px; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 900px) {
+  .header { padding: 12px 16px; }
+  .header h1 { font-size: 16px; }
+  .kpi-bar { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 20px; }
+  .main-layout { grid-template-columns: 1fr; gap: 0; padding: 0 8px; }
+  .sidebar { display: none; }
+  .mobile-tabs { display: flex; }
+  .filter-bar { top: 76px; padding: 8px 12px; }
+  .search-input { min-width: 140px; }
+  .filter-stats { display: none; }
+  .highlights, .kpi-bar { padding: 0 8px; }
+  .company-card { padding: 14px; }
+}
+@media (max-width: 480px) {
+  .header h1 { font-size: 15px; }
+  .header .sub { display: none; }
+  .kpi-value { font-size: 18px; }
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>오프라인 결제·매장관리 시장 경쟁사 모니터링</h1>
-  <div class="sub">POS/테이블오더/키오스크 · 결제(PG/VAN) · 멤버십/브랜드앱 · 빅테크 플랫폼 — 30개 업체</div>
-</div>
-
-<div class="toolbar">
-  <div class="update-info">
-    마지막 업데이트: <strong id="lastUpdated">-</strong>
+<header class="header">
+  <div class="header-inner">
+    <div>
+      <h1>오프라인 결제·매장관리 시장 경쟁사 모니터링</h1>
+      <div class="sub">POS · PG/VAN · 멤버십·브랜드앱 · 빅테크 — 30개 업체 일일 추적</div>
+    </div>
+    <div class="meta">
+      <span class="dot"></span>
+      <span id="updateTime">로딩 중...</span>
+    </div>
   </div>
-  <button class="btn-refresh" onclick="location.reload(true)">🔄 새로고침</button>
-  <span class="shared-badge">비버웍스 경영관리본부</span>
+</header>
+
+<section class="kpi-bar" id="kpiBar"></section>
+
+<section class="highlights">
+  <div class="section-title"><span class="icon">⭐</span>오늘의 핵심 뉴스</div>
+  <div class="highlights-grid" id="highlightsGrid"></div>
+</section>
+
+<div class="filter-bar">
+  <div class="filter-row">
+    <span class="filter-pill" data-period="all" id="filterAll">전체</span>
+    <span class="filter-pill" data-period="today" id="filterToday">오늘</span>
+    <span class="filter-pill active" data-period="week" id="filterWeek">최근 7일</span>
+    <span class="filter-pill" data-period="2week" id="filter2week">최근 14일</span>
+    <div class="filter-divider"></div>
+    <input type="text" class="search-input" id="searchInput" placeholder="🔍 업체명·키워드 검색...">
+    <span class="filter-stats" id="filterStats"></span>
+  </div>
+  <div class="mobile-tabs" id="mobileTabs"></div>
 </div>
 
-<div id="highlightsSection"></div>
-
-<div class="search-bar" style="padding-top:12px;">
-  <input type="text" class="search-input" id="searchInput" placeholder="업체명 또는 키워드 검색...">
+<div class="main-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content" id="content"></main>
 </div>
 
-<div class="tabs" id="tabs"></div>
-<div class="content" id="content"></div>
-<div class="footer">
-  매일 09/11/13/15/17/19시 자동 갱신 · 데이터 출처: 네이버 뉴스 검색 API
-</div>
+<footer class="footer">
+  매일 09/11/13/15/17/19시 자동 갱신 · 데이터: 네이버 뉴스 검색 API · 비버웍스 경영관리본부
+</footer>
 
 <script>
 /*__NEWS_DATA__*/
 /*__HIGHLIGHTS__*/
+/*__KPIS__*/
 /*__LAST_UPDATED__*/
+/*__LAST_UPDATED_ISO__*/
 /*__COMPANIES__*/
 
 const TYPE_LABELS = { direct: "직접경쟁", indirect: "간접경쟁", eco: "생태계", bigtech: "빅테크", kiosk: "키오스크" };
 const TYPE_CLASS = { direct: "type-direct", indirect: "type-indirect", eco: "type-eco", bigtech: "type-bigtech", kiosk: "type-kiosk" };
+const SENTIMENT_LABELS = { positive: "긍정", negative: "부정", neutral: "중립" };
 
-let activeTab = Object.keys(COMPANIES)[0];
-let allCompanies = [];
+let activeCategory = '전체';
+let activePeriod = 'week';
+let searchFilter = '';
+
+const allCompanies = [];
 Object.entries(COMPANIES).forEach(([cat, list]) => list.forEach(c => allCompanies.push({...c, category: cat})));
 
-if (typeof LAST_UPDATED !== 'undefined' && LAST_UPDATED) {
-  document.getElementById('lastUpdated').textContent = LAST_UPDATED;
-}
-
+// ========== Helpers ==========
 function escapeHtml(s) {
   return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function relativeTime(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const updated = new Date(isoStr);
+    const now = new Date();
+    const diffMs = now - updated;
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return '방금 전';
+    if (diffMin < 60) return diffMin + '분 전';
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return diffHr + '시간 전';
+    const diffDay = Math.floor(diffHr / 24);
+    return diffDay + '일 전';
+  } catch(e) { return ''; }
+}
+
+function dateInPeriod(dateStr, period) {
+  if (period === 'all') return true;
+  if (!dateStr) return false;
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  const target = new Date(dateStr);
+  const days = Math.floor((today - target) / 86400000);
+  if (period === 'today') return dateStr === todayStr;
+  if (period === 'week') return days <= 7;
+  if (period === '2week') return days <= 14;
+  return true;
+}
+
+// ========== Viewed tracking (localStorage) ==========
+function getViewedSet() {
+  try { return new Set(JSON.parse(localStorage.getItem('viewedNews') || '[]')); }
+  catch(e) { return new Set(); }
+}
+function markViewed(url) {
+  if (!url) return;
+  const s = getViewedSet();
+  s.add(url);
+  if (s.size > 500) {
+    const arr = Array.from(s).slice(-500);
+    localStorage.setItem('viewedNews', JSON.stringify(arr));
+  } else {
+    localStorage.setItem('viewedNews', JSON.stringify(Array.from(s)));
+  }
+}
+function isViewed(url) { return url && getViewedSet().has(url); }
+
+// ========== Header time ==========
+function renderHeaderTime() {
+  const rel = relativeTime(LAST_UPDATED_ISO);
+  document.getElementById('updateTime').textContent =
+    rel ? `${rel} 업데이트 · ${LAST_UPDATED}` : LAST_UPDATED;
+}
+
+// ========== KPI Cards ==========
+function renderKpis() {
+  const top1 = (KPIS.top_companies && KPIS.top_companies[0]) || {name: '-', count: 0};
+  const total = KPIS.total_all || 1;
+  const posPct = Math.round((KPIS.positive / total) * 100) || 0;
+  const negPct = Math.round((KPIS.negative / total) * 100) || 0;
+  const html = `
+    <div class="kpi-card">
+      <div class="kpi-label">📊 전체 뉴스</div>
+      <div class="kpi-value">${KPIS.total_all}<span style="font-size:14px;color:var(--text-3);font-weight:600;"> 건</span></div>
+      <div class="kpi-sub">오늘 <strong>${KPIS.total_today}</strong> · 최근 7일 <strong>${KPIS.total_week}</strong></div>
+    </div>
+    <div class="kpi-card positive">
+      <div class="kpi-label">📈 긍정 시그널</div>
+      <div class="kpi-value green">${KPIS.positive}<span style="font-size:14px;color:var(--text-3);font-weight:600;"> 건</span></div>
+      <div class="kpi-sub">전체의 <strong>${posPct}%</strong></div>
+    </div>
+    <div class="kpi-card negative">
+      <div class="kpi-label">📉 부정 시그널</div>
+      <div class="kpi-value red">${KPIS.negative}<span style="font-size:14px;color:var(--text-3);font-weight:600;"> 건</span></div>
+      <div class="kpi-sub">전체의 <strong>${negPct}%</strong></div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">🔥 가장 활발한 업체</div>
+      <div class="kpi-value" style="font-size:18px;">${escapeHtml(top1.name)}</div>
+      <div class="kpi-sub"><strong>${top1.count}건</strong>${KPIS.top_companies[1] ? ' · 2위 ' + escapeHtml(KPIS.top_companies[1].name) + ' ' + KPIS.top_companies[1].count + '건' : ''}</div>
+    </div>
+  `;
+  document.getElementById('kpiBar').innerHTML = html;
+}
+
+// ========== Highlights ==========
 function renderHighlights() {
-  const el = document.getElementById('highlightsSection');
-  if (!HIGHLIGHTS || HIGHLIGHTS.length === 0) { el.innerHTML = ''; return; }
-  let html = '<div class="highlights"><div class="highlights-title">오늘의 핵심 뉴스</div>';
-  HIGHLIGHTS.forEach(h => {
-    const typeClass = h.type ? ' hl-type-' + h.type : '';
-    html += `<div class="highlight-card"><span class="hl-badge${typeClass}">${escapeHtml(h.type || '뉴스')}</span><div class="hl-body"><div class="hl-company">${escapeHtml(h.company)}</div><div class="hl-title">${escapeHtml(h.title)}</div><div class="hl-summary">${escapeHtml(h.summary || '')}</div></div></div>`;
+  const el = document.getElementById('highlightsGrid');
+  if (!HIGHLIGHTS || HIGHLIGHTS.length === 0) {
+    el.innerHTML = '<div class="no-data">최근 핵심 뉴스가 없습니다.</div>';
+    return;
+  }
+  el.innerHTML = HIGHLIGHTS.map(h => {
+    const typeClass = h.type ? 'hl-type-' + h.type : '';
+    const viewedClass = isViewed(h.url) ? 'viewed' : '';
+    const sentClass = h.sentiment ? 'sent-' + h.sentiment : '';
+    const onclickAttr = h.url ? `onclick="window.open('${escapeHtml(h.url)}','_blank');markViewed('${escapeHtml(h.url)}');this.classList.add('viewed');"` : '';
+    return `<div class="highlight-card ${viewedClass} ${sentClass}" ${onclickAttr}>
+      <div class="hl-meta">
+        <span class="hl-badge ${typeClass}">${escapeHtml(h.type || '뉴스')}</span>
+        <span class="hl-company">${escapeHtml(h.company)}</span>
+      </div>
+      <div class="hl-title">${escapeHtml(h.title)}</div>
+      <div class="hl-summary">${escapeHtml(h.summary || '')}</div>
+      ${h.source ? `<div class="hl-source">${escapeHtml(h.source)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ========== Sidebar (desktop) ==========
+function renderSidebar() {
+  const el = document.getElementById('sidebar');
+  let html = '<div class="sidebar-section-title">카테고리</div>';
+  // 전체
+  let totalNews = 0;
+  Object.values(NEWS_DATA).forEach(items => totalNews += items.filter(it => dateInPeriod(it.date, activePeriod)).length);
+  html += `<div class="sidebar-item ${activeCategory==='전체'?'active':''}" onclick="setCategory('전체')">
+    <span>전체</span><span class="count">${allCompanies.length}</span></div>`;
+  Object.entries(COMPANIES).forEach(([cat, list]) => {
+    const active = activeCategory === cat ? 'active' : '';
+    html += `<div class="sidebar-item ${active}" onclick="setCategory('${escapeHtml(cat)}')">
+      <span style="overflow:hidden;text-overflow:ellipsis;">${escapeHtml(cat)}</span>
+      <span class="count">${list.length}</span></div>`;
   });
-  html += '</div>';
   el.innerHTML = html;
 }
 
-function renderTabs() {
-  const tabsEl = document.getElementById('tabs');
-  tabsEl.innerHTML = '';
+// ========== Mobile tabs ==========
+function renderMobileTabs() {
+  const el = document.getElementById('mobileTabs');
+  let html = `<div class="mobile-tab ${activeCategory==='전체'?'active':''}" onclick="setCategory('전체')">전체<span class="tab-count">${allCompanies.length}</span></div>`;
   Object.entries(COMPANIES).forEach(([cat, list]) => {
-    const t = document.createElement('div');
-    t.className = 'tab' + (cat === activeTab ? ' active' : '');
-    t.innerHTML = escapeHtml(cat) + '<span class="badge">' + list.length + '</span>';
-    t.onclick = () => { activeTab = cat; renderTabs(); renderContent(); };
-    tabsEl.appendChild(t);
+    const active = activeCategory === cat ? 'active' : '';
+    const shortName = cat.split('(')[0].split('/')[0].trim();
+    html += `<div class="mobile-tab ${active}" onclick="setCategory('${escapeHtml(cat)}')">${escapeHtml(shortName)}<span class="tab-count">${list.length}</span></div>`;
   });
-  const all = document.createElement('div');
-  all.className = 'tab' + (activeTab === '전체' ? ' active' : '');
-  all.innerHTML = '전체<span class="badge">' + allCompanies.length + '</span>';
-  all.onclick = () => { activeTab = '전체'; renderTabs(); renderContent(); };
-  tabsEl.appendChild(all);
+  el.innerHTML = html;
 }
 
-function renderContent(filter) {
+window.setCategory = function(cat) {
+  activeCategory = cat;
+  renderSidebar(); renderMobileTabs(); renderContent();
+};
+
+// ========== Filter bar ==========
+function bindFilters() {
+  document.querySelectorAll('.filter-pill[data-period]').forEach(pill => {
+    pill.onclick = () => {
+      activePeriod = pill.dataset.period;
+      document.querySelectorAll('.filter-pill[data-period]').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      renderSidebar(); renderContent();
+    };
+  });
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchFilter = e.target.value.toLowerCase();
+    renderContent();
+  });
+}
+
+// ========== Main content ==========
+function renderContent() {
   const el = document.getElementById('content');
-  const companies = activeTab === '전체' ? allCompanies : COMPANIES[activeTab] || [];
-  const filtered = filter ? companies.filter(c =>
-    c.name.toLowerCase().includes(filter) ||
-    c.desc.toLowerCase().includes(filter) ||
-    c.tags.some(t => t.toLowerCase().includes(filter)) ||
-    (NEWS_DATA[c.name] || []).some(n => n.title.toLowerCase().includes(filter) || (n.summary||'').toLowerCase().includes(filter))
-  ) : companies;
+  const companies = activeCategory === '전체' ? allCompanies : (COMPANIES[activeCategory] || []);
+  let filtered = companies;
+  let totalShown = 0;
+
+  if (searchFilter) {
+    filtered = companies.filter(c =>
+      c.name.toLowerCase().includes(searchFilter) ||
+      c.desc.toLowerCase().includes(searchFilter) ||
+      c.tags.some(t => t.toLowerCase().includes(searchFilter)) ||
+      (NEWS_DATA[c.name] || []).some(n => n.title.toLowerCase().includes(searchFilter) || (n.summary||'').toLowerCase().includes(searchFilter))
+    );
+  }
+
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="no-data"><div class="big">🔍</div>검색 결과가 없습니다</div>';
+    document.getElementById('filterStats').textContent = '';
+    return;
+  }
+
   let html = '';
   filtered.forEach(c => {
-    const news = NEWS_DATA[c.name] || [];
+    const allNews = NEWS_DATA[c.name] || [];
+    const news = allNews.filter(n => dateInPeriod(n.date, activePeriod));
+    totalShown += news.length;
     const newsCountHtml = news.length > 0 ? `<span class="news-count">${news.length}건</span>` : '';
-    html += `<div class="company-card"><div class="card-header"><div class="card-name">${escapeHtml(c.name)}${newsCountHtml}</div><span class="card-type ${TYPE_CLASS[c.type]}">${TYPE_LABELS[c.type]}</span></div><div class="card-desc">${escapeHtml(c.desc)}</div><div class="card-tags">${c.tags.map(t => '<span class="tag">#' + escapeHtml(t) + '</span>').join('')}</div>`;
+    html += `<div class="company-card">
+      <div class="card-header">
+        <div class="card-name">${escapeHtml(c.name)}${newsCountHtml}</div>
+        <span class="card-type ${TYPE_CLASS[c.type]}">${TYPE_LABELS[c.type]}</span>
+      </div>
+      <div class="card-desc">${escapeHtml(c.desc)}</div>
+      <div class="card-tags">${c.tags.map(t => '<span class="tag">#' + escapeHtml(t) + '</span>').join('')}</div>`;
     if (news.length > 0) {
       html += '<div class="news-section">';
       news.forEach(n => {
-        const titleHtml = n.url ? `<a href="${escapeHtml(n.url)}" target="_blank" rel="noopener">${escapeHtml(n.title)}</a>` : escapeHtml(n.title);
-        html += `<div class="news-item"><div class="ni-title">${titleHtml}</div>${n.summary ? '<div class="ni-summary">' + escapeHtml(n.summary) + '</div>' : ''}<div class="ni-meta">${escapeHtml(n.source || '')} ${n.date ? '· ' + escapeHtml(n.date) : ''}</div></div>`;
+        const viewedClass = isViewed(n.url) ? 'viewed' : '';
+        const sent = n.sentiment || 'neutral';
+        const titleHtml = n.url
+          ? `<a href="${escapeHtml(n.url)}" target="_blank" rel="noopener" onclick="markViewed('${escapeHtml(n.url)}');this.closest('.news-item').classList.add('viewed');">${escapeHtml(n.title)}</a>`
+          : escapeHtml(n.title);
+        html += `<div class="news-item ${viewedClass}">
+          <div class="news-sentiment-bar ${sent}"></div>
+          <div class="news-body">
+            <div class="ni-title">${titleHtml}</div>
+            ${n.summary ? '<div class="ni-summary">' + escapeHtml(n.summary) + '</div>' : ''}
+            <div class="ni-meta">
+              ${n.source ? '<span class="ni-source">' + escapeHtml(n.source) + '</span>' : ''}
+              ${n.date ? '<span>· ' + escapeHtml(n.date) + '</span>' : ''}
+              <span class="ni-sentiment ${sent}">${SENTIMENT_LABELS[sent]}</span>
+            </div>
+          </div>
+        </div>`;
       });
       html += '</div>';
     } else {
-      html += '<div class="no-news">최근 특이사항 없음</div>';
+      html += '<div class="no-news">선택 기간 내 뉴스 없음</div>';
     }
     html += '</div>';
   });
-  if (filtered.length === 0) html = '<div class="no-data">검색 결과가 없습니다</div>';
+
   el.innerHTML = html;
+  document.getElementById('filterStats').textContent = `${filtered.length}개 업체 · ${totalShown}건`;
 }
 
-document.getElementById('searchInput').addEventListener('input', function(e) {
-  renderContent(e.target.value.toLowerCase());
-});
-
+// ========== Init ==========
+renderHeaderTime();
+setInterval(renderHeaderTime, 60000); // 1분마다 갱신
+renderKpis();
 renderHighlights();
-renderTabs();
+renderSidebar();
+renderMobileTabs();
+bindFilters();
 renderContent();
 </script>
 </body>
